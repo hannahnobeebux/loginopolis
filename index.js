@@ -78,34 +78,21 @@ app.post("/login", async(req, res, next) => {
 //Using something like Array.prototype.map() would be great here, calling bcrypt.hash for each password.
 //Try using Promise.all() to let each promise resolve in concurrency (more efficient).
 
-// async function hashingUserDetails (req,res)  {
-//   const allUsers = User.findAll()
-//   const hashedUserPasswords = allUsers.map(x => bcrypt.hash(x.password, 10))
-//   Promise.all([hashedUserPassword].then((values) => {
-//     console.log(values.password);
-//   }))
-// }
+async function hashingUserDetails (req,res)  {
+  const allUsers = await User.findAll()
+  // console.log(allUsers)
+  const hashedPasswords = await Promise.all(allUsers.map(async (user) => {
+    return await bcrypt.hash(user.password, 10);
+  }));
+  console.log(hashedPasswords)
+ }
+
+
+hashingUserDetails();
+
 
 //EXTENSION - Add a model like Post or Recipe or anything that can be associated to a User.
 //Create seed data for 2-3 of the users in the seed file.
-// function creatingNewModel(){
-
-//   class Post extends Model {}
-
-//   Post.init({
-//     title:{
-//       type: DataTypes.STRING, 
-//       allowNull: false 
-//     }, 
-//     description:{
-//       type: DataTypes.STRING, 
-//       allowNull: false
-//     }
-//   })
-
-//   User.hasMany(Post); 
-
-// }
 
 
 //EXTENSION - In other lessons, we’ll learn about better authentication & authorization flows, but for now:
