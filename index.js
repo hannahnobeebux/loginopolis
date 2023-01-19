@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const { User } = require('./db');
 const bcrypt = require('bcrypt');
+const { Post } = require('./db/Post');
 // const { DataTypes } = require('sequelize/types');
 
 app.use(express.json());
@@ -78,26 +79,51 @@ app.post("/login", async(req, res, next) => {
 //Using something like Array.prototype.map() would be great here, calling bcrypt.hash for each password.
 //Try using Promise.all() to let each promise resolve in concurrency (more efficient).
 
-async function hashingUserDetails (req,res)  {
-  const allUsers = await User.findAll()
-  // console.log(allUsers)
-  const hashedPasswords = await Promise.all(allUsers.map(async (user) => {
-    return await bcrypt.hash(user.password, 10);
-  }));
-  console.log(hashedPasswords)
- }
+// async function hashingUserDetails (req,res)  {
+//   const allUsers = await User.findAll()
+//   // console.log(allUsers)
+//   const hashedPasswords = await Promise.all(allUsers.map(async (user) => {
+//     return await bcrypt.hash(user.password, 10);
+//   }));
+//   console.log(hashedPasswords)
+//  }
 
 
-hashingUserDetails();
+// hashingUserDetails();
 
 
 //EXTENSION - Add a model like Post or Recipe or anything that can be associated to a User.
 //Create seed data for 2-3 of the users in the seed file.
+//1. Create a Post Model and export it
+//2. Add seed data to seedData.json
+//3. Import Post model into other index.js and create one-to-many relationship between User and Post
+
 
 
 //EXTENSION - In other lessons, we’ll learn about better authentication & authorization flows, but for now:
 //Similar to how POST /login works, use the username and password to authenticate the user.
 //If the password matches, send back the associated data created in the last bonus step.
+
+app.get("/me", async(req,res) => {
+  
+  try {
+  const {username, password} = req.body; 
+
+  const user = await User.findOne({where: {username: username}});
+  const passwordsMatch = await bcrypt.compare(password, user.password); 
+  if (passwordsMatch) {
+    const userPosts = await Post.findAll({where: {userid: user.id}})
+    res.send(userPosts);
+  } else {
+    res.send("incorrect username or password")
+  }
+    
+  } catch (error) {
+    console.log(error);
+    
+  }
+  
+})
 
 
 
